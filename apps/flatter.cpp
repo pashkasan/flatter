@@ -14,7 +14,7 @@
 #include <flatter/flatter.h>
 
 void print_help() {
-  std::cout << "Usage: flatter [-h] [-v] [-alpha ALPHA | -rhf RHF | -delta DELTA] [-logcond LOGCOND] [INFILE [OUTFILE]]" << std::endl;
+  std::cout << "Usage: flatter [-h] [-v] [-q] [-p] [-alpha ALPHA | -rhf RHF | -delta DELTA] [-logcond LOGCOND] [-of OUTFORMAT] [INFILE [OUTFILE]]" << std::endl;
   std::cout << "\tINFILE -\tinput lattice (FPLLL format). Defaults to STDIN" << std::endl;
   std::cout << "\tOUTFILE -\toutput lattice (FPLLL format). Defaults to STDOUT" << std::endl;
   std::cout << "\t-h -\thelp message." << std::endl;
@@ -26,6 +26,7 @@ void print_help() {
   std::cout << "\t\t-rhf RHF -\tReduce analogous to given root hermite factor" << std::endl;
   std::cout << "\t\t-delta DELTA -\tReduce analogous to LLL with particular delta (approximate)" << std::endl;
   std::cout << "\t-logcond LOGCOND -\tBound on condition number." << std::endl;
+  std::cout << "\t-of [b|u] -\t\tOutput format (basis or unimodular matrix)." << std::endl;
 }
 
 std::shared_ptr<std::istream> inp_lat;
@@ -38,6 +39,7 @@ bool logcond_set = false;
 bool show_profile = false;
 double alpha = 0.0;
 double logcond = 0.0;
+std::vector<char> output_formats;
 
 bool parse_args(int argc, char** argv) {
   if (argc < 1) {
@@ -95,6 +97,25 @@ bool parse_args(int argc, char** argv) {
       arg_ind++;
       logcond = atof(argv[arg_ind]);
       logcond_set = true;
+    } else if (strcmp(arg, "-of") == 0) {
+      if (arg_ind + 1 >= argc) {
+        return false;
+      }
+      arg_ind++;
+      char* out_fmt_ptr = argv[arg_ind];
+      while (*out_fmt_ptr != 0) {
+        switch(*out_fmt_ptr) {
+          case 'b':
+            output_formats.push_back('b');
+            break;
+          case 'u':
+            output_formats.push_back('u');
+            break;
+          default:
+            return false;
+        }
+        out_fmt_ptr++;
+      }
     } else {
       // Either input file or output file
       if (inp_lat == nullptr) {
@@ -261,7 +282,17 @@ int main(int argc, char** argv) {
   }
 
   if (!quiet) {
-    (*out_lat) << L;
+    // Was there an output format specified? If not, default to just output the basis
+    if (output_formats.size() == 0) {
+      output_formats.push_back('b');
+    }
+    for (auto it : output_formats) {
+      if (it == 'b') {
+        (*out_lat) << L;
+      } else {
+        (*out_lat) << U;
+      }
+    }
   }
 
 

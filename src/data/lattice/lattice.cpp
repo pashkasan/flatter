@@ -109,31 +109,7 @@ std::istream& operator>>(std::istream& is, Lattice& L) {
 }
 
 std::ostream& operator<<(std::ostream& os, Lattice& L) {
-    unsigned int rank = L.rank();
-    unsigned int dim = L.dimension();
-
-    MatrixData<mpz_t> dM = L.basis().data<mpz_t>();
-
-    void (*free)(void *, size_t);
-    mp_get_memory_functions (NULL, NULL, &free);
-
-    os << "[";
-    for (unsigned int i = 0; i < rank; i++) {
-        os << "[";
-        for (unsigned int j = 0; j < dim; j++) {
-            char* elem = mpz_get_str(nullptr, 10, dM(j, i));
-            std::string elem_s(elem);
-            os << elem_s;
-            if (j < dim - 1) {
-                os << " ";
-            } else {
-                os << "]" << std::endl;
-            }
-
-            free(elem, strlen(elem) + 1);
-        }
-    }
-    os << "]" << std::endl;
+    os << L.basis();
     return os;
 }
 

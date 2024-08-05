@@ -49,6 +49,7 @@ public:
     template<class T>
     static bool is_type(const Matrix& A);
 
+    friend std::ostream& operator<<(std::ostream& os, Matrix& L);
 private:
     ElementType t_;
     MatrixData<mpfr_t> md_mpfr;

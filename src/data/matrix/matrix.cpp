@@ -2,6 +2,10 @@
 
 #include "workspace_buffer.h"
 #include <cassert>
+#include <cstring>
+#include <istream>
+#include <ostream>
+#include <sstream>
 
 namespace flatter {
 
@@ -360,6 +364,38 @@ bool Matrix::is_type<int64_t>(const Matrix& A) {
 template <>
 bool Matrix::is_type<double>(const Matrix& A) {
     return A.type() == ElementType::DOUBLE;
+}
+
+std::ostream& operator<<(std::ostream& os, Matrix& M) {
+    unsigned int nrows = M.nrows();
+    unsigned int ncols = M.ncols();
+
+    MatrixData<mpz_t> dM = M.data<mpz_t>();
+
+    void (*free)(void *, size_t);
+    mp_get_memory_functions (NULL, NULL, &free);
+
+    // We're printing in FPLLL format (row notation)
+    // but store the data in column notation, so print
+    // the transpose.
+    os << "[";
+    for (unsigned int i = 0; i < ncols; i++) {
+        os << "[";
+        for (unsigned int j = 0; j < nrows; j++) {
+            char* elem = mpz_get_str(nullptr, 10, dM(j, i));
+            std::string elem_s(elem);
+            os << elem_s;
+            if (j < nrows - 1) {
+                os << " ";
+            } else {
+                os << "]" << std::endl;
+            }
+
+            free(elem, strlen(elem) + 1);
+        }
+    }
+    os << "]" << std::endl;
+    return os;
 }
 
 }

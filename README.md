@@ -20,6 +20,7 @@ Usage: flatter [-h] [-v] [-alpha ALPHA | -rhf RHF | -delta DELTA] [-logcond LOGC
 		-rhf RHF -	Reduce analogous to given root hermite factor
 		-delta DELTA -	Reduce analogous to LLL with particular delta (approximate)
 	-logcond LOGCOND -	Bound on condition number.
+	-of [b|u] -		Output format (basis or unimodular matrix).
 ```
 
 flatter reduces lattice bases specified in the fplll format.
@@ -29,6 +30,20 @@ $ latticegen q 4 2 10 b | flatter
 [2 10 8 2]
 [1 4 -5 -13]
 [4 4 -12 12]
+]
+```
+flatter can output both the reduced basis (b) and the unimodular transformation matrix (u).
+```
+$ latticegen q 4 2 10 b | flatter -of b -of u
+[[4 -1 1 0]
+[2 10 8 2]
+[1 4 -5 -13]
+[4 4 -12 12]
+]
+[[4 -1 -2 -1]
+[2 10 -7 -7]
+[1 4 -3 -3]
+[4 4 -5 -4]
 ]
 ```
 Optionally, information about the input and output bases can be printed.
